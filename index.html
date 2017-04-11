@@ -9,7 +9,11 @@
 		<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
 		<link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
 		<link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
-		<link rel="stylesheet" type="text/css" href="stylesheets/usc2017.css" media="screen">
+		<link rel="stylesheet" type="text/css" href="stylesheets/cnu2017.css" media="screen">
+
+<link rel="stylesheet" type="text/css" href="stylesheets/monokai.css" media="screen">
+<script src="js/rainbow-custom.min.js"></script>
+<script src="js/csharp.js"></script>
 	</head>
 	<body>
 		<section class="page-header">
@@ -24,11 +28,125 @@
 					<ol>
 						<li>Unity程式基礎
 							<ul>
-								<li>Debug.Log(s)</li>								
+								<li>string字串,int整數,bool布林</li>
+<pre><code data-language="csharp">//要買的飲料是什麼,要幾杯,老闆帥不帥
+public string 飲料="珍奶";
+public int 幾杯=1;
+public bool 老闆帥=true;</code></pre>
+								<li>Debug.Log(s)</li>
+<pre><code data-language="csharp">//將要顯示的句子用 + 組合起來一次顯示出來
+Debug.Log ("老闆我要"+幾杯+"杯"+飲料);</code></pre>
 								<li>if else 條件語句</li>
+<pre><code data-language="csharp">//如果老闆帥就要電話，如果不帥就叫老闆快點
+if (老闆帥) {
+	Debug.Log ("老闆可以給我你的電話號碼嗎");
+} else {
+	Debug.Log ("老闆可以快點嗎 我趕時間");
+}</code></pre>
+
 								<li>for 迴圈</li>
-								<li>transform.Translate(x,y,z)</li>
-								<li>transform.Rotate(x,y,z)</li>
+<pre><code data-language="csharp">//睡不著的時候用迴圈數羊
+Debug.Log ("睡不著覺來數羊");
+//從第1隻開始數，要數到1000隻
+for (int 第幾 = 1; 第幾 < 1000; 第幾++) {
+
+	Debug.Log (第幾 + "隻羊");//現在數到第幾隻
+
+	//數到300隻就睡著了
+	if (第幾 == 300) {
+	
+		Debug.Log ("zzzZZZ");// zzzZZZ 睡著了
+		break;	//已經睡著就不再數了
+	}
+}</code></pre>
+
+								<li>transform.Translate(x,y,z) 物件移動</li>
+<pre><code data-language="csharp">//Unity中OnGUI函式可以在畫面上畫出簡單的GUI
+void OnGUI (){
+	//如果GUI上的按鈕被按下
+	//這個按鈕在X10,Y10的地方,寬200,高30,上面寫著X ++的字
+	if (GUI.Button(new Rect(10,10,200,30),"X ++")) {
+		//讓物件向X軸移動1單位
+		Target.transform.Translate (1,0,0);
+	}
+	if (GUI.Button(new Rect(210,10,200,30),"X --")) {
+		Target.transform.Translate (-1,0,0);
+	}
+
+	if (GUI.Button(new Rect(10,40,200,30),"Y ++")) {
+		Target.transform.Translate (0,1,0);
+	}
+	if (GUI.Button(new Rect(210,40,200,30),"Y --")) {
+		Target.transform.Translate (0,-1,0);
+	}
+
+	if (GUI.Button(new Rect(10,70,200,30),"Z ++")) {
+		Target.transform.Translate (0,0,1);
+	}
+	if (GUI.Button(new Rect(210,70,200,30),"Z --")) {
+		Target.transform.Translate (0,0,-1);
+	}
+}
+</code></pre>
+								<li>transform.Rotate(x,y,z) 物件旋轉</li>
+<pre><code data-language="csharp">//Unity中OnGUI函式可以在畫面上畫出簡單的GUI
+void OnGUI (){
+	//如果GUI上的按鈕被按下
+	//這個按鈕在X10,Y10的地方,寬200,高30,上面寫著X ++的字
+	if (GUI.Button(new Rect(10,10,200,30),"X ++")) {
+		//讓物件以X軸旋轉10度
+		Target.transform.Rotate (10,0,0);
+	}
+	if (GUI.Button(new Rect(210,10,200,30),"X --")) {
+		Target.transform.Rotate (-10,0,0);
+	}
+
+	if (GUI.Button(new Rect(10,40,200,30),"Y ++")) {
+		Target.transform.Rotate (0,10,0);
+	}
+	if (GUI.Button(new Rect(210,40,200,30),"Y --")) {
+		Target.transform.Rotate (0,-10,0);
+	}
+
+	if (GUI.Button(new Rect(10,70,200,30),"Z ++")) {
+		Target.transform.Rotate (0,0,10);
+	}
+	if (GUI.Button(new Rect(210,70,200,30),"Z --")) {
+		Target.transform.Rotate (0,0,-10);
+	}
+}
+</code></pre>
+								<li>Input.GetMouseButtonDown(Button) 檢查滑鼠輸入</li>
+<pre><code data-language="csharp">//Unity中Update函式可以在畫面更新時執行一次
+void Update() {
+	//如果按下滑鼠左鍵,顯示按下按下滑鼠左鍵
+	if (Input.GetMouseButtonDown(0)){
+		Debug.Log("按下滑鼠左鍵");
+	}
+	if (Input.GetMouseButtonDown(1)){
+		Debug.Log("按下滑鼠右鍵");
+	}
+	if (Input.GetMouseButtonDown(2)){
+		Debug.Log("按下滑鼠中鍵");
+	}
+}
+</code></pre>
+								
+								
+								
+								<li>Input.GetKey(KeyCode key) 檢查鍵盤輸入</li>
+<pre><code data-language="csharp">//Unity中Update函式可以在畫面更新時執行一次
+void Update() {
+	//如果按下鍵盤向上方向鍵,顯示向上方向鍵被按了
+	if (Input.GetKey(KeyCode.UpArrow)){
+		print("向上方向鍵被按了");
+	}
+	//如果按下鍵盤向下方向鍵,顯示向下方向鍵被按了
+	if (Input.GetKey(KeyCode.DownArrow)){
+		print("向下方向鍵被按了");
+	}	
+}
+</code></pre>
 							</ul>
 						</li>
 						<li>練習/提問</li>
@@ -37,7 +155,7 @@
 				</li>
 				<li><a href="#">第二週 (4/24) &hearts;&hearts;&hearts;</a>
 					<ol>
-						<li>遊戲製作</li>
+						<li>碰撞偵測</li>
 						<li>遊戲測試</li>
 					</ol>
 				</li>

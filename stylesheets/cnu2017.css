@@ -1,4 +1,6 @@
-
+.main-content pre {
+	background-color: #b0b0b0;
+}
 .color-background{
 	color: #fff;
 	text-align: center;
