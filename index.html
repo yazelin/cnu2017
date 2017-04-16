@@ -86,6 +86,14 @@ void OnGUI (){
 	if (GUI.Button(new Rect(210,70,200,30),"Z --")) {
 		Target.transform.Translate (0,0,-1);
 	}
+	//如果按下鍵盤W鍵
+	if (Input.GetKey(KeyCode.W)) {
+		Target.transform.Translate (0,0,1);//向z軸移動
+	}
+	//如果按下鍵盤S鍵
+	if (Input.GetKey(KeyCode.S)) {
+		Target.transform.Translate (0,0,-1);//向z軸反方向移動
+	}
 }
 </code></pre>
 								<li>transform.Rotate(x,y,z) 物件旋轉</li>
