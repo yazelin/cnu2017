@@ -137,6 +137,10 @@ void Update() {
 	if (Input.GetMouseButtonDown(2)){
 		Debug.Log("按下滑鼠中鍵");
 	}
+	
+	//Input.GetAxis("Mouse X") 可以取得滑鼠左右移動的差值
+	Target.transform.Rotate (0,Input.GetAxis("Mouse X"),0);//依取得的差值用Y軸旋轉(即左右旋轉)
+
 }
 </code></pre>
 								
