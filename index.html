@@ -26,7 +26,7 @@
 			<ul>
 				<li><a href="#">第一週 (4/17)  &hearts;&hearts; </a>
 					<ol>
-						<li>Unity程式基礎
+						<li>Unity程式基礎 <a href="./share/Example.zip">範例專案下載</a>
 							<ul>
 								<li>string字串,int整數,bool布林</li>
 <pre><code data-language="csharp">//要買的飲料是什麼,要幾杯,老闆帥不帥
@@ -159,7 +159,7 @@ void Update() {
 	}	
 }
 </code></pre>
-						<li>PlayerController.cs</li>
+								<li>PlayerController.cs</li>
 <pre><code data-language="csharp">
 //Unity中Update函式可以在畫面更新時執行一次
 void Update() {
@@ -206,9 +206,322 @@ void Update() {
 						<li>課後線上討論</li>
 					</ol>
 				</li>
+				
+				
 				<li><a href="#">第二週 (4/24) &hearts;&hearts;&hearts;</a>
 					<ol>
-						<li><a href="https://unity3d.com/learn/tutorials/topics/multiplayer-networking">Multiplayer Networking</a></li>
+						<li>多人連線遊戲 完整步驟
+							<ol>
+								<li>開新專案(3D)->建立新場景->儲存場景取名叫Main</li>
+								<li>在場景中建立一個空物件(重新命名為NetworkManager)->在該物件上加入NetworkManager及NetworkManagerHUD組件</li>
+								<li>製作Player遊戲物件->在該遊戲物件上加入NetworkIdentity組件(並勾選Local Player Authority)</li>
+								<li>將Player Prefab加入NetworkManager/Spwan Info/Player Prefab中</li>
+								<li>在Player Prefab上加入一個新的程式PlayerController->執行看看
+<pre><code data-language="csharp">using UnityEngine;
+
+public class PlayerController : MonoBehaviour
+{
+    void Update()
+    {
+        var x = Input.GetAxis("Horizontal") * Time.deltaTime * 150.0f;
+        var z = Input.GetAxis("Vertical") * Time.deltaTime * 3.0f;
+
+        transform.Rotate(0, x, 0);//旋轉
+        transform.Translate(0, 0, z);//前進後退
+    }
+}
+</code></pre>					</li>
+								<li>修改PlayerController程式->在Player Prefab上加入NetworkTransform組件
+<pre><code data-language="csharp">using UnityEngine;
+using UnityEngine.Networking;
+
+public class PlayerController : NetworkBehaviour
+{
+    void Update()
+    {
+        if (!isLocalPlayer)
+        {
+            return;
+        }
+
+        var x = Input.GetAxis("Horizontal") * Time.deltaTime * 150.0f;
+        var z = Input.GetAxis("Vertical") * Time.deltaTime * 3.0f;
+
+        transform.Rotate(0, x, 0);
+        transform.Translate(0, 0, z);
+    }
+}
+</code></pre>					</li>
+								<li>修改PlayerController程式(讓連線時可以分辯)
+<pre><code data-language="csharp">using UnityEngine;
+using UnityEngine.Networking;
+
+public class PlayerController : NetworkBehaviour
+{
+    void Update()
+    {
+        if (!isLocalPlayer)
+        {
+            return;
+        }
+
+        var x = Input.GetAxis("Horizontal") * Time.deltaTime * 150.0f;
+        var z = Input.GetAxis("Vertical") * Time.deltaTime * 3.0f;
+
+        transform.Rotate(0, x, 0);
+        transform.Translate(0, 0, z);
+    }
+
+    public override void OnStartLocalPlayer()
+    {
+        GetComponent<MeshRenderer>().material.color = Color.blue;
+    }
+}
+</code></pre>					</li>
+								<li>建立遊戲物件命名為Bullet->加入Rigidbody並製作成Prefab->修改PlayerController程式
+<pre><code data-language="csharp">using UnityEngine;
+using UnityEngine.Networking;
+
+public class PlayerController : NetworkBehaviour
+{
+    public GameObject bulletPrefab;
+    public Transform bulletSpawn;
+
+    void Update()
+    {
+        if (!isLocalPlayer)
+        {
+            return;
+        }
+
+        var x = Input.GetAxis("Horizontal") * Time.deltaTime * 150.0f;
+        var z = Input.GetAxis("Vertical") * Time.deltaTime * 3.0f;
+
+        transform.Rotate(0, x, 0);
+        transform.Translate(0, 0, z);
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Fire();
+        }
+    }
+
+
+    void Fire()
+    {
+        // Create the Bullet from the Bullet Prefab
+        var bullet = (GameObject)Instantiate(
+            bulletPrefab,
+            bulletSpawn.position,
+            bulletSpawn.rotation);
+
+        // Add velocity to the bullet
+        bullet.GetComponent<Rigidbody>().velocity = bullet.transform.forward * 6;
+
+        // Destroy the bullet after 2 seconds
+        Destroy(bullet, 2.0f);        
+    }
+
+    public override void OnStartLocalPlayer ()
+    {
+        GetComponent<MeshRenderer>().material.color = Color.blue;
+    }
+}
+</code></pre>					</li>
+								<li>Bullet Prefab上加入NetworkIdentity和NetworkTransform(並將NetworkTransform中的Network Send Rate設為0)->並把Bullet Prefab加入NetworkManager/Spwan Info/Registered Spawnable Prefabs中->更新PlayerController程式
+								
+<pre><code data-language="csharp">using UnityEngine;
+using UnityEngine.Networking;
+
+public class PlayerController : NetworkBehaviour
+{
+    public GameObject bulletPrefab;
+    public Transform bulletSpawn;
+
+    void Update()
+    {
+        if (!isLocalPlayer)
+        {
+            return;
+        }
+
+        var x = Input.GetAxis("Horizontal") * Time.deltaTime * 150.0f;
+        var z = Input.GetAxis("Vertical") * Time.deltaTime * 3.0f;
+
+        transform.Rotate(0, x, 0);
+        transform.Translate(0, 0, z);
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            CmdFire();
+        }
+    }
+
+    // This [Command] code is called on the Client …
+    // … but it is run on the Server!
+    [Command]
+    void CmdFire()
+    {
+        // Create the Bullet from the Bullet Prefab
+        var bullet = (GameObject)Instantiate(
+            bulletPrefab,
+            bulletSpawn.position,
+            bulletSpawn.rotation);
+
+        // Add velocity to the bullet
+        bullet.GetComponent<Rigidbody>().velocity = bullet.transform.forward * 6;
+
+        // Spawn the bullet on the Clients
+        NetworkServer.Spawn(bullet);
+
+        // Destroy the bullet after 2 seconds
+        Destroy(bullet, 2.0f);
+    }
+
+    public override void OnStartLocalPlayer ()
+    {
+        GetComponent<MeshRenderer>().material.color = Color.blue;
+    }
+}</code></pre>					</li>
+								<li>建立子彈碰撞後銷毀程式->加入使用者血量和血量程式以及讓血量固定面向攝影機
+<pre><code data-language="csharp">using UnityEngine;
+using System.Collections;
+
+public class Bullet : MonoBehaviour {
+    
+    void OnCollisionEnter(Collision collision)
+    {
+        var hit = collision.gameObject;
+        var health = hit.GetComponent<Health>();
+        if (health  != null)
+        {
+            health.TakeDamage(10);
+        }
+
+        Destroy(gameObject);
+    }
+}</code></pre>
+<pre><code data-language="csharp">using UnityEngine;
+using UnityEngine.UI;
+using System.Collections;
+
+public class Health : MonoBehaviour {
+
+    public const int maxHealth = 100;
+    public int currentHealth = maxHealth;
+    public RectTransform healthBar;
+
+    public void TakeDamage(int amount)
+    {
+        currentHealth -= amount;
+        if (currentHealth <= 0)
+        {
+            currentHealth = 0;
+            Debug.Log("Dead!");
+        }
+
+        healthBar.sizeDelta = new Vector2(currentHealth, healthBar.sizeDelta.y);
+    }
+}
+</code></pre>
+<pre><code data-language="csharp">using UnityEngine;
+using System.Collections;
+
+public class Billboard : MonoBehaviour {
+
+    void Update () {
+        transform.LookAt(Camera.main.transform);
+    }
+}
+</code></pre>
+								
+								</li>
+								<li>修改血量程式由Server端處理並同步				
+<pre><code data-language="csharp">using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.Networking;
+using System.Collections;
+
+public class Health : NetworkBehaviour {
+
+    public const int maxHealth = 100;
+
+    [SyncVar(hook = "OnChangeHealth")]
+    public int currentHealth = maxHealth;
+
+    public RectTransform healthBar;
+
+    public void TakeDamage(int amount)
+    {
+        if (!isServer)
+            return;
+        
+        currentHealth -= amount;
+        if (currentHealth <= 0)
+        {
+            currentHealth = 0;
+            Debug.Log("Dead!");
+        }
+    }
+
+    void OnChangeHealth (int health)
+    {
+        healthBar.sizeDelta = new Vector2(health, healthBar.sizeDelta.y);
+    }
+}
+</code></pre>					</li>
+								<li>修改血量程式(角色死亡和重生)
+								
+<pre><code data-language="csharp">using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.Networking;
+using System.Collections;
+
+public class Health : NetworkBehaviour {
+
+    public const int maxHealth = 100;
+
+    [SyncVar(hook = "OnChangeHealth")]
+    public int currentHealth = maxHealth;
+
+    public RectTransform healthBar;
+
+    public void TakeDamage(int amount)
+    {
+        if (!isServer)
+            return;
+        
+        currentHealth -= amount;
+        if (currentHealth <= 0)
+        {
+            currentHealth = maxHealth;
+
+            // called on the Server, but invoked on the Clients
+            RpcRespawn();
+        }
+    }
+
+    void OnChangeHealth (int currentHealth )
+    {
+        healthBar.sizeDelta = new Vector2(currentHealth , healthBar.sizeDelta.y);
+    }
+
+    [ClientRpc]
+    void RpcRespawn()
+    {
+        if (isLocalPlayer)
+        {
+            // move back to zero location
+            transform.position = Vector3.zero;
+        }
+    }
+}
+</code></pre>
+								</li>
+								
+							</ol>
+						</li>
+						<li>參考資料<a href="https://unity3d.com/learn/tutorials/topics/multiplayer-networking">Multiplayer Networking</a></li>
 					</ol>
 				</li>
 			</ul>
